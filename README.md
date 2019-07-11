@@ -55,7 +55,7 @@ Run the test (following command will start sending push notifications from 5 cli
 for 5s duration)
 
 ```
-k6 run --vus 10 --duration 5s test/k6-load-test.js
+k6 run --vus 5 --duration 5s test/k6-load-test.js
 ```
 
 When the test is finished, k6 will print out test results with useful information, such as
