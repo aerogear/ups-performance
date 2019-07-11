@@ -60,5 +60,5 @@ k6 run --vus 10 --duration 5s test/k6-load-test.js
 
 When the test is finished, k6 will print out test results with useful information, such as
 * number of finished iterations (notifications sent and processed)
-* number successful/failed requests
+* number of successful/failed requests
 * average time spent on one iteration
