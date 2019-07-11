@@ -1,25 +1,24 @@
 const axios = require('axios')
 const FormData = require('form-data')
+const { generateDeviceToken } = require('../helpers')
 
 const upsInstanceUrl = process.env.UPS_URL || 'http://localhost:9999'
 const appsEndpoint = `${upsInstanceUrl}/rest/applications`
 const registerDeviceEndpoint = `${upsInstanceUrl}/rest/registry/device`
 
-const { iosBase64Cert, iosCertPassword } = require('../fixtures')
-const { generateDeviceToken } = require('../helpers')
+const androidSenderId = process.env.ANDROID_SENDER_ID || 'testsenderid'
+const androidServerKey = process.env.ANDROID_SERVER_KEY || 'testserverkey'
+const iosBase64Cert = process.env.IOS_BASE64_CERTIFICATE || require('../fixtures').iosBase64Cert
+const iosCertPassword = process.env.IOS_CERTIFICATE_PASSWORD || require('../fixtures').iosCertPassword
 
 async function createApp (appName) {
   return axios({
     method: 'POST',
     url: `${appsEndpoint}`,
     data: { name: appName }
-  })
-}
-
-async function deleteApp (appId) {
-  return axios({
-    method: 'DELETE',
-    url: `${appsEndpoint}/${appId}`
+  }).catch((err) => {
+    console.error('Cannot create UPS Application')
+    throw new Error(`Statuscode: ${err.response.status}, statustext: ${err.response.statusText}`)
   })
 }
 
@@ -31,9 +30,12 @@ async function createAndroidVariant (appId, variantName) {
     url: `${variantEndpoint}`,
     data: {
       name: variantName,
-      projectNumber: 'testsenderid',
-      googleKey: 'testserverkey'
+      projectNumber: androidSenderId,
+      googleKey: androidServerKey
     }
+  }).catch((err) => {
+    console.error('Cannot create Android variant')
+    throw new Error(`Statuscode: ${err.response.status}, statustext: ${err.response.statusText}`)
   })
 }
 
@@ -52,11 +54,14 @@ async function createIosVariant (appId, variantName) {
     url: `${variantEndpoint}`,
     data: bodyFormData,
     headers: bodyFormData.getHeaders()
+  }).catch((err) => {
+    console.error('Cannot create iOS variant')
+    throw new Error(`Statuscode: ${err.response.status}, statustext: ${err.response.statusText}`)
   })
 }
 
 async function registerDevice (variantId, variantSecret) {
-  axios({
+  return axios({
     url: `${registerDeviceEndpoint}`,
     method: 'POST',
     auth: {
@@ -72,32 +77,28 @@ async function registerDevice (variantId, variantSecret) {
       categories: ['football', 'sport']
     }
   }).catch((err) => {
-    console.log(err.response.status)
-    console.log(err.response.statusText)
-  }).then((res) => {
-    console.log(res.status)
-    console.log(res.statusText)
+    console.error('Cannot register a device')
+    throw new Error(`Statuscode: ${err.response.status}, statustext: ${err.response.statusText}`)
   })
 }
 
 async function init () {
-  const application = (await createApp('test')).data
+  try {
+    const application = (await createApp('test')).data
 
-  const androidVariant = (await createAndroidVariant(application.pushApplicationID, 'test')).data
-  const iosVariant = (await createIosVariant(application.pushApplicationID, 'test')).data
+    const androidVariant = (await createAndroidVariant(application.pushApplicationID, 'test')).data
+    const iosVariant = (await createIosVariant(application.pushApplicationID, 'test')).data
 
-  console.log(`
+    await registerDevice(androidVariant.variantID, androidVariant.secret)
+    await registerDevice(iosVariant.variantID, iosVariant.secret)
+
+    console.log(`
     Push Application ID:    ${application.pushApplicationID}
     Master Secret:          ${application.masterSecret}
-    Android Variant ID:     ${androidVariant.variantID}
-    Android Variant Secret: ${androidVariant.secret}
-    iOS Variant ID:         ${iosVariant.variantID}
-    iOS Variant Secret:     ${iosVariant.secret}
-    `
-  )
-  await registerDevice(androidVariant.variantID, androidVariant.secret)
-  await registerDevice(iosVariant.variantID, iosVariant.secret)
-  //await deleteApp(application.pushApplicationID)
+    `)
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 init()

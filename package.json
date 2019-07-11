@@ -19,8 +19,7 @@
   "homepage": "https://github.com/aerogear/ups-performance#readme",
   "dependencies": {
     "axios": "^0.19.0",
-    "form-data": "^2.5.0",
-    "unifiedpush-node-sender": "^0.16.1"
+    "form-data": "^2.5.0"
   },
   "devDependencies": {
     "eslint": "^6.0.1",
