@@ -1,0 +1,32 @@
+{
+  "name": "ups-performance",
+  "version": "1.0.0",
+  "description": "Repository for storing scripts used for load/performance testing of UPS (Unified Push Server)",
+  "main": "index.js",
+  "scripts": {
+    "init": "node init",
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aerogear/ups-performance.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/aerogear/ups-performance/issues"
+  },
+  "homepage": "https://github.com/aerogear/ups-performance#readme",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "form-data": "^2.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0"
+  }
+}
