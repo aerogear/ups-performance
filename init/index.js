@@ -91,12 +91,12 @@ async function init () {
   try {
     const application = (await createApp('test')).data
 
-    if (args.variants.indexOf('android') !== -1) {
+    if (!args.variants || args.variants.indexOf('android') !== -1) {
       const androidVariant = (await createAndroidVariant(application.pushApplicationID, 'test')).data
       await registerDevice(androidVariant.variantID, androidVariant.secret)
     }
 
-    if (args.variants.indexOf('ios') !== -1) {
+    if (!args.variants || args.variants.indexOf('ios') !== -1) {
       const iosVariant = (await createIosVariant(application.pushApplicationID, 'test')).data
       await registerDevice(iosVariant.variantID, iosVariant.secret)
     }
