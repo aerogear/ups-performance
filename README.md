@@ -20,26 +20,33 @@ export UPS_URL="https://your-ups-instance.openshift.com"
 
 Export these variables if you want to populate UPS instance with valid Firebase/APNS credentials
 ```
-export UPS_URL="https://your-ups-instance.openshift.com"
 export ANDROID_SENDER_ID="<firebase-sender-id>"
 export ANDROID_SERVER_KEY="<firebase-sender-key>"
 export IOS_BASE64_CERTIFICATE="<base64-encoded-ios-dev-certificate>"
 export IOS_CERTIFICATE_PASSWORD="<password-for-ios-certificate>"
 ```
 
-Run the script to populate UPS instance with application, variants and to register (fake) devices
+Run the script to populate UPS instance with application, 2 variants (Android & iOS) and to register (fake) devices (1 for each variant)
 ```
-node init
+npm run init
 ```
 
 This will print out the information you need to run the tests
 
 ```
-$ node init
+$ npm run init
 
     Push Application ID:    219e929a-2909-4057-bccd-66de8771c294
     Master Secret:          9a44275c-329d-4405-9150-aa730e276364
 ```
+
+You can also specify which variants you want to create and the number of devices you want to register to each variant:
+
+```
+npm run init -- --variants android,ios --devices 10
+```
+
+Command above will create both android and ios variants with 10 devices registered to each variant 
 
 ## How to run the tests
 

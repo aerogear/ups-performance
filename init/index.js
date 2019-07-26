@@ -11,6 +11,8 @@ const androidServerKey = process.env.ANDROID_SERVER_KEY || 'testserverkey'
 const iosBase64Cert = process.env.IOS_BASE64_CERTIFICATE || require('../fixtures').iosBase64Cert
 const iosCertPassword = process.env.IOS_CERTIFICATE_PASSWORD || require('../fixtures').iosCertPassword
 
+const args = require('yargs').argv
+
 async function createApp (appName) {
   return axios({
     method: 'POST',
@@ -61,36 +63,43 @@ async function createIosVariant (appId, variantName) {
 }
 
 async function registerDevice (variantId, variantSecret) {
-  return axios({
-    url: `${registerDeviceEndpoint}`,
-    method: 'POST',
-    auth: {
-      username: variantId,
-      password: variantSecret
-    },
-    data: {
-      deviceToken: await generateDeviceToken(),
-      deviceType: 'tablet',
-      operatingSystem: 'Android',
-      osVersion: '6.1.2',
-      alias: 'cordova',
-      categories: ['football', 'sport']
-    }
-  }).catch((err) => {
-    console.error('Cannot register a device')
-    throw new Error(`Statuscode: ${err.response.status}, statustext: ${err.response.statusText}`)
-  })
+  const numberOfDevices = args.devices || 1
+  for (let i = 0; i < numberOfDevices; i++) {
+    await axios({
+      url: `${registerDeviceEndpoint}`,
+      method: 'POST',
+      auth: {
+        username: variantId,
+        password: variantSecret
+      },
+      data: {
+        deviceToken: await generateDeviceToken(),
+        deviceType: 'tablet',
+        operatingSystem: 'Android',
+        osVersion: '6.1.2',
+        alias: 'cordova',
+        categories: ['football', 'sport']
+      }
+    }).catch((err) => {
+      console.error('Cannot register a device')
+      throw new Error(`Statuscode: ${err.response.status}, statustext: ${err.response.statusText}`)
+    })
+  }
 }
 
 async function init () {
   try {
     const application = (await createApp('test')).data
 
-    const androidVariant = (await createAndroidVariant(application.pushApplicationID, 'test')).data
-    const iosVariant = (await createIosVariant(application.pushApplicationID, 'test')).data
+    if (!args.variants || args.variants.indexOf('android') !== -1) {
+      const androidVariant = (await createAndroidVariant(application.pushApplicationID, 'test')).data
+      await registerDevice(androidVariant.variantID, androidVariant.secret)
+    }
 
-    await registerDevice(androidVariant.variantID, androidVariant.secret)
-    await registerDevice(iosVariant.variantID, iosVariant.secret)
+    if (!args.variants || args.variants.indexOf('ios') !== -1) {
+      const iosVariant = (await createIosVariant(application.pushApplicationID, 'test')).data
+      await registerDevice(iosVariant.variantID, iosVariant.secret)
+    }
 
     console.log(`
     Push Application ID:    ${application.pushApplicationID}
