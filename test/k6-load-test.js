@@ -25,6 +25,9 @@ const messageConfig = {
 export default function () {
   const payload = JSON.stringify(messageConfig)
   const res = http.post(senderApiUrl, payload, params)
+  if (res.error !== '') {
+    console.log(res.error)
+  }
   check(res, {
     'return status 202 after notification is sent': r => r.status === 202,
     'no errors from ups server after sending notification': r => r.error === ''
